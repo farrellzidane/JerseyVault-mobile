@@ -326,11 +326,62 @@ Contoh kode :
 ## Tugas 8
 
 ### 1. Apa kegunaan const di Flutter? Jelaskan apa keuntungan ketika menggunakan const pada kode Flutter. Kapan sebaiknya kita menggunakan const, dan kapan sebaiknya tidak digunakan?
+Di Flutter, `const` digunakan untuk membuat sebuah widget menjadi *immutable* atau tidak berubah sejak awal *compile*. Jika sebuah widget ditandai sebagai `const`, maka Flutter tidak perlu *rebuild* widget tersebut setiap UI di-*render*, karena tampilan widget tersebut tidak akan berubah.
+
+Menggunakan `const` bermanfaat saat memiliki widget statis yang tidak perlu diperbarui ulang, seperti teks atau ikon yang tetap. Namun, sebaiknya hindari `const` jika widget atau variabel akan berubah selama siklus hidup aplikasi, seperti pada widget dinamis atau interaktif yang datanya dapat diperbarui.
 
 ### 2. Jelaskan dan bandingkan penggunaan Column dan Row pada Flutter. Berikan contoh implementasi dari masing-masing layout widget ini!
+`Column` menyusun widget secara **vertikal** (dari atas ke bawah), sedangkan `Row` menyusun widget secara **horizontal** (dari kiri ke kanan). 
 
+Keduanya memiliki properti yang mirip, seperti `mainAxisAlignment` untuk mengatur posisi atau distribusi *child* widget (vertikal pada `Column` dan horizontal pada `Row`) dan `crossAxisAlignment` untuk mengatur posisi atau distribusi widget pada sumbu silang (horizontal pada `Column` dan vertikal pada `Row`).
+
+#### Contoh implementasi :
+- Column :
+```dart
+    Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Pusatkan widget secara vertikal
+        crossAxisAlignment: CrossAxisAlignment.start, // Selaraskan widget ke kiri
+        children: [
+            Text('Item 1'),
+            Text('Item 2'),
+            Text('Item 3'),
+        ],
+    )
+```
+
+- Row
+```dart
+    Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround, // Spasi di antara widget
+        crossAxisAlignment: CrossAxisAlignment.center, // Pusatkan widget secara vertikal
+        children: [
+            Icon(Icons.star),
+            Icon(Icons.favorite),
+            Icon(Icons.share),
+        ],
+    )
+
+```
 ### 3. Sebutkan apa saja elemen input yang kamu gunakan pada halaman form yang kamu buat pada tugas kali ini. Apakah terdapat elemen input Flutter lain yang tidak kamu gunakan pada tugas ini? Jelaskan!
+Pada tugas kali ini, saya menggunakan beberapa elemen input Flutter, yaitu :
+- `TextFormField`:
+    - Digunakan untuk mengambil input teks, seperti Nama Jersey, Deskripsi, Harga, dan Kuantitas.
+    - Setiap `TextFormField` memiliki properti `validator` untuk memvalidasi input, misalnya memastikan bahwa input tidak kosong dan bahwa input untuk harga dan kuantitas merupakan angka.
+    
+- `ElevatedButton`:
+    - Digunakan sebagai tombol Save untuk menyimpan data dari form. Tombol ini memicu proses validasi dan, jika berhasil, menampilkan dialog konfirmasi menggunakan `AlertDialog`.
+
+Ada beberapa elemen yang tidak digunakan :
+- `DropdownButton` : Digunakan untuk membuat daftar pilihan dan cocok untuk input pilihan terbatas seperti ukuran atau kategori.
+- `CheckboxListTile` dan `Switch` : Digunakan untuk input pilihan ya/tidak, misalnya untuk menentukan apakah produk tersedia.
+- `Slider` : Dapat digunakan untuk input angka dalam rentang tertentu.
 
 ### 4. Bagaimana cara kamu mengatur tema (theme) dalam aplikasi Flutter agar aplikasi yang dibuat konsisten? Apakah kamu mengimplementasikan tema pada aplikasi yang kamu buat?
 
+Untuk mengatur tema dalam aplikasi Flutter agar konsisten, saya mendefinisikan theme di level aplikasi melalui properti theme pada `MaterialApp` di file `main.dart`. Dengan mendefinisikan tema di `ThemeData`, saya bisa menentukan warna utama (`primarySwatch`) dan warna sekunder (`secondary`), serta pengaturan lainnya seperti teks dan gaya tombol, sehingga tema tersebut akan diterapkan secara global ke seluruh aplikasi. Ini memastikan tampilan aplikasi konsisten tanpa harus mengatur ulang tema di setiap layar atau widget.
+
 ### 5. Bagaimana cara kamu menangani navigasi dalam aplikasi dengan banyak halaman pada Flutter?
+
+Untuk menangani navigasi dalam aplikasi Flutter dengan banyak halaman, saya menggunakan `Navigator` dan `MaterialPageRoute`. Dalam kode `jersey_card.dart`, navigasi diimplementasikan dengan memanfaatkan `Navigator.push` untuk berpindah ke halaman lain ketika tombol tertentu ditekan. `Navigator.push` menambahkan halaman baru ke stack navigasi, sehingga halaman saat ini akan tetap berada di bawah halaman baru yang dibuka, dan pengguna dapat kembali ke halaman sebelumnya dengan menekan tombol *back*.
+
+Pada kode di atas, ketika tombol dengan nama `"Add new Jersey"` ditekan, `Navigator.push` dipanggil dengan MaterialPageRoute, yang akan membuka halaman `JersyEntryFormPage`. Ini dilakukan dengan memanggil `Navigator.push(context, MaterialPageRoute(builder: (context) => const JersyEntryFormPage()))`. Metode ini membuat navigasi antarhalaman sederhana dan memungkinkan pengguna kembali ke halaman sebelumnya. 

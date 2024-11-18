@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jerseyvault/screens/jerseyentry_form.dart';
+import 'package:jerseyvault/screens/list_jerseyentry.dart';
 import 'package:jerseyvault/screens/menu.dart';
 // TODO: Impor halaman MoodEntryFormPage jika sudah dibuat
 
@@ -56,8 +57,20 @@ class LeftDrawer extends StatelessWidget {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => JersyEntryFormPage(),
+                    builder: (context) => JerseyEntryFormPage(),
                   ));
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.sports_soccer),
+            title: const Text('List Jersey'),
+            onTap: () {
+              // Route menu ke halaman jersey
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const JerseyEntryPage()),
+              );
             },
           ),
         ],

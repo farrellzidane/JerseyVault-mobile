@@ -436,7 +436,7 @@ Instance `CookieRequest` perlu dibagikan ke semua komponen aplikasi agar berbaga
 - Saya memulai dengan mengimplementasikan fitur registrasi akun pada Flutter. Langkah pertama adalah membuat aplikasi autentikasi (authentication app) di dalam proyek Django saya bernama **JerseyVault    **. Setelah itu, saya menyesuaikan berbagai pengaturan yang diperlukan untuk aplikasi Django baru, seperti melakukan konfigurasi di **`settings.py`**, menambahkan dependensi menggunakan **`pip install`**, dan memperbarui file **`requirements.txt`**.
 
 - Selanjutnya, saya membuat metode untuk login di file **`views.py`** dalam aplikasi authentication. Metode ini bertugas memproses permintaan login. Setelah itu, saya menambahkan pengaturan pada **`urls.py`** untuk menghubungkan endpoint yang diperlukan.
-
+ 
 - Untuk mengintegrasikan sistem autentikasi di Flutter, saya menginstal package yang disebutkan dalam tutorial. Saya kemudian memperbarui file **`main.dart`** untuk mendefinisikan **`CookieRequest`** sebagai provider global, sehingga dapat digunakan di berbagai bagian aplikasi.
 
 ```dart

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jerseyvault/models/jersey_entry.dart';
+import 'package:jerseyvault/screens/detail_page.dart';
 import 'package:jerseyvault/widgets/left_drawer.dart';
 import 'package:pbp_django_auth/pbp_django_auth.dart';
 import 'package:provider/provider.dart';
@@ -55,32 +56,46 @@ class _JerseyEntryPageState extends State<JerseyEntryPage> {
               );
             } else {
               return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (_, index) => Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${snapshot.data![index].fields.jerseyName}",
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (_, index) => InkWell(
+                        onTap: () {
+                          // Navigasi ke halaman detail
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailPage(
+                                product:
+                                    snapshot.data![index], // Kirim data jersey
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${snapshot.data![index].fields.jerseyName}",
+                                style: const TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                  "${snapshot.data![index].fields.description}"),
+                              const SizedBox(height: 10),
+                              Text("${snapshot.data![index].fields.quantity}"),
+                              const SizedBox(height: 10),
+                              Text("${snapshot.data![index].fields.price}")
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text("${snapshot.data![index].fields.description}"),
-                      const SizedBox(height: 10),
-                      Text("${snapshot.data![index].fields.quantity}"),
-                      const SizedBox(height: 10),
-                      Text("${snapshot.data![index].fields.price}")
-                    ],
-                  ),
-                ),
-              );
+                      ));
             }
           }
         },

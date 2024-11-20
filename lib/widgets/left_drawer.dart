@@ -62,7 +62,7 @@ class LeftDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.sports_soccer),
+            leading: const Icon(Icons.shopping_bag),
             title: const Text('List Jersey'),
             onTap: () {
               // Route menu ke halaman jersey

@@ -385,3 +385,259 @@ Untuk mengatur tema dalam aplikasi Flutter agar konsisten, saya mendefinisikan t
 Untuk menangani navigasi dalam aplikasi Flutter dengan banyak halaman, saya menggunakan `Navigator` dan `MaterialPageRoute`. Dalam kode `jersey_card.dart`, navigasi diimplementasikan dengan memanfaatkan `Navigator.push` untuk berpindah ke halaman lain ketika tombol tertentu ditekan. `Navigator.push` menambahkan halaman baru ke stack navigasi, sehingga halaman saat ini akan tetap berada di bawah halaman baru yang dibuka, dan pengguna dapat kembali ke halaman sebelumnya dengan menekan tombol *back*.
 
 Pada kode di atas, ketika tombol dengan nama `"Add new Jersey"` ditekan, `Navigator.push` dipanggil dengan MaterialPageRoute, yang akan membuka halaman `JersyEntryFormPage`. Ini dilakukan dengan memanggil `Navigator.push(context, MaterialPageRoute(builder: (context) => const JersyEntryFormPage()))`. Metode ini membuat navigasi antarhalaman sederhana dan memungkinkan pengguna kembali ke halaman sebelumnya. 
+
+## Tugas 9
+### 1. Jelaskan mengapa kita perlu membuat model untuk melakukan pengambilan ataupun pengiriman data JSON? Apakah akan terjadi error jika kita tidak membuat model terlebih dahulu?
+Model digunakan untuk membantu mengelola data JSON dengan cara yang **lebih terstruktur** dan **rapih**. Dengan membuat model, data dari JSON dapat langsung di-*mapping* ke dalam objek Dart yang memiliki tipe data yang jelas. Tanpa membuat model, user harus menangani data secara manual dan memastikan semua kunci dan tipe data sesuai. Ini membuat kode rentan terhadap *runtime error*, seperti kesalahan saat mengambil kunci JSON atau mencoba memproses tipe data yang tidak sesuai. 
+
+### 2. Jelaskan fungsi dari library http yang sudah kamu implementasikan pada tugas ini
+Library `http` digunakan untuk membantu aplikasi berkomunikasi dengan server. Dalam tugas ini, library tersebut digunakan untuk mengambil data dari API melalui permintaan HTTP, seperti `GET`, dan menerima respon berupa JSON. Data yang diambil dari server kemudian diolah dan ditampilkan di app, misalnya untuk menampilkan daftar jersey. Dengan library ini, aplikasi flutter ini bisa terhubung ke backend untuk mendapatkan atau mengirim data secara langsung.
+
+### 3. Jelaskan fungsi dari CookieRequest dan jelaskan mengapa instance CookieRequest perlu untuk dibagikan ke semua komponen di aplikasi Flutter.
+Fungsi dari `CookieRequest` adalah alat untuk mengelola permintaan HTTP yang memerlukan autentikasi berbasis cookie, digunakan untuk mengirim dan menerima data dari server sambil menyimpan informasi autentikasi (seperti *cookiesessions*) yang diperlukan untuk menjaga status login user
+
+Instance `CookieRequest` perlu dibagikan ke semua komponen aplikasi agar berbagai bagian aplikasi bisa mengakses informasi autentikasi yang sama. Misalnya, saat user berpindah antar layar, status login tetap terjaga, dan komponen lain yang membutuhkan data dari server dapat menggunakan cookie yang tersimpan tanpa perlu autentikasi ulang.
+
+### 4. Jelaskan mekanisme pengiriman data mulai dari input hingga dapat ditampilkan pada Flutter.
+1. **Pengisian Data di Form Input** :   
+    User memasukkan data melalui `TextFormField` di `jerseyentry_form.dart`, seperti **nama jersey**, **deskripsi**, **harga**, dan **jumlah**. Input ini disimpan ke dalam variabel seperti `_jersey`, `_description`, `_price`, dan `_quantity`. Sebelum dikirim, data divalidasi menggunakan metode `validator` untuk memastikan bahwa semua input sudah benar dan tidak kosong.
+
+2. **Pengiriman Data ke Backend** :
+    Setelah form divalidasi, data dikirim ke server Django menggunakan metode `postJson` dari `CookieRequest`. Data yang dikirim di-encode ke format JSON menggunakan `jsonEncode`, dengan **key-value** sesuai dengan format yang diterima backend (contohnya `jersey_name`, `description`, dll.). Server Django menerima data ini melalui endpoint, seperti `http://127.0.0.1:8000/create-flutter/`, memprosesnya (misalnya menyimpannya ke dalam database), dan mengembalikan respons.
+
+3. **Respon dari Backend** : Backend memberikan respons berupa JSON yang berisi status (success atau error) dan pesan tambahan jika diperlukan. Jika statusnya success, aplikasi akan menampilkan notifikasi menggunakan `ScaffoldMessenger` bahwa data berhasil disimpan. Jika terjadi kesalahan, pengguna akan mendapatkan notifikasi kesalahan.
+
+4. **Menampilkan Data** : Data yang telah dikirimkan dan disimpan di database dapat diambil kembali menggunakan metode `HTTP GET` di halaman seperti `list_jerseyentry.dart`. Fungsi `fetchjersey` mengambil data dari server melalui endpoint (misalnya `http://127.0.0.1:8000/json/`) dan mengubah JSON yang diterima menjadi objek Dart (model Product) menggunakan metode `Product.fromJson`. Objek ini kemudian digunakan untuk menampilkan data di layar, seperti **nama jersey**, **deskripsi**, **harga**, dan **jumlah**.
+
+
+### 5. Jelaskan mekanisme autentikasi dari login, register, hingga logout. Mulai dari input data akun pada Flutter ke Django hingga selesainya proses autentikasi oleh Django dan tampilnya menu pada Flutter.
+#### **Login:**
+- **Input:** Pengguna mengisi username/email dan password di aplikasi Flutter. 
+- **Proses di Django:** Data login dikirim menggunakan `HTTP POST` ke endpoint login Django. Django memeriksa kecocokan username/email dan password. Jika valid, Django membuat sesi untuk pengguna dan mengirimkan cookie sesi kembali ke Flutter. 
+- **Flutter:** Cookie yang diterima disimpan oleh **CookieRequest** untuk digunakan pada permintaan yang memerlukan autentikasi.
+
+#### **Register:**
+- **Input:** Pengguna mengisi data seperti nama, email, dan password melalui Flutter. 
+- **Proses di Django:** Data registrasi dikirim menggunakan `HTTP POST` ke endpoint register Django. Django memvalidasi data dan menyimpannya ke dalam database jika semua data valid.
+- **Flutter:** Jika registrasi berhasil, aplikasi mengarahkan pengguna ke halaman login.
+
+#### **Logout:**
+- **Flutter:** Aplikasi mengirim permintaan HTTP (`GET` atau `POST`) ke endpoint logout Django dengan menyertakan cookie sesi.
+- **Django:** Django menghapus sesi pengguna sehingga cookie menjadi tidak valid.
+- **Flutter:** Cookie dihapus dari **CookieRequest**, dan aplikasi mengarahkan pengguna kembali ke halaman login.
+
+#### **Menampilkan Menu Setelah Login:**
+- Setelah login, setiap permintaan ke server menyertakan cookie sesi untuk memverifikasi autentikasi pengguna. Jika cookie valid, server memproses permintaan dan mengembalikan data yang diperlukan. Data ini kemudian digunakan Flutter untuk menampilkan menu atau halaman yang hanya dapat diakses oleh pengguna yang telah login.
+
+
+### 6. Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step! (bukan hanya sekadar mengikuti tutorial).
+#### Step-by-Step Implementasi Checklist
+
+- Saya memulai dengan mengimplementasikan fitur registrasi akun pada Flutter. Langkah pertama adalah membuat aplikasi autentikasi (authentication app) di dalam proyek Django saya bernama **JerseyVault    **. Setelah itu, saya menyesuaikan berbagai pengaturan yang diperlukan untuk aplikasi Django baru, seperti melakukan konfigurasi di **`settings.py`**, menambahkan dependensi menggunakan **`pip install`**, dan memperbarui file **`requirements.txt`**.
+
+- Selanjutnya, saya membuat metode untuk login di file **`views.py`** dalam aplikasi authentication. Metode ini bertugas memproses permintaan login. Setelah itu, saya menambahkan pengaturan pada **`urls.py`** untuk menghubungkan endpoint yang diperlukan.
+
+- Untuk mengintegrasikan sistem autentikasi di Flutter, saya menginstal package yang disebutkan dalam tutorial. Saya kemudian memperbarui file **`main.dart`** untuk mendefinisikan **`CookieRequest`** sebagai provider global, sehingga dapat digunakan di berbagai bagian aplikasi.
+
+```dart
+    // main.dart
+    import 'package:flutter/material.dart';
+    import 'package:jerseyvault/screens/login.dart';
+    // import 'package:jerseyvault/screens/menu.dart';
+    import 'package:pbp_django_auth/pbp_django_auth.dart';
+    import 'package:provider/provider.dart';
+
+    void main() {
+    runApp(const MyApp());
+    }
+
+    class MyApp extends StatelessWidget {
+    const MyApp({super.key});
+
+    @override
+    Widget build(BuildContext context) {
+        return Provider(
+        create: (_) {
+            CookieRequest request = CookieRequest();
+            return request;
+        },
+        child: MaterialApp(
+            title: 'JerseyVault',
+            theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSwatch(
+                primarySwatch: Colors.blue,
+            ).copyWith(secondary: Colors.blue[400]),
+            ),
+            home: const LoginPage(),
+        ),
+        );
+    }
+    }
+
+```
+
+- Setelah konfigurasi dasar selesai, saya membuat file **`login.dart`** di dalam folder **`screens`** untuk menampilkan halaman login.
+
+- Selanjutnya, saya menambahkan fungsi registrasi di **`views.py`** pada aplikasi authentication di Django agar pengguna baru dapat membuat akun. Di sisi Flutter, saya membuat layar baru bernama **`register.dart`** untuk menampilkan form registrasi bagi pengguna.
+
+```python     
+    @csrf_exempt
+    def login(request):
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                auth_login(request, user)
+                # Status login sukses.
+                return JsonResponse({
+                    "username": user.username,
+                    "status": True,
+                    "message": "Login sukses!"
+                    # Tambahkan data lainnya jika ingin mengirim data ke Flutter.
+                }, status=200)
+            else:
+                return JsonResponse({
+                    "status": False,
+                    "message": "Login gagal, akun dinonaktifkan."
+                }, status=401)
+
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": "Login gagal, periksa kembali email atau kata sandi."
+            }, status=401)
+        
+    @csrf_exempt
+    def register(request):
+        if request.method == 'POST':
+            data = json.loads(request.body)
+            username = data['username']
+            password1 = data['password1']
+            password2 = data['password2']
+
+            # Check if the passwords match
+            if password1 != password2:
+                return JsonResponse({
+                    "status": False,
+                    "message": "Passwords do not match."
+                }, status=400)
+            
+            # Check if the username is already taken
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({
+                    "status": False,
+                    "message": "Username already exists."
+                }, status=400)
+            
+            # Create the new user
+            user = User.objects.create_user(username=username, password=password1)
+            user.save()
+            
+            return JsonResponse({
+                "username": user.username,
+                "status": 'success',
+                "message": "User created successfully!"
+            }, status=200)
+        
+        else:
+            return JsonResponse({
+                "status": False,
+                "message": "Invalid request method."
+            }, status=400)
+        
+    @csrf_exempt
+    def logout(request):
+        username = request.user.username
+
+        try:
+            auth_logout(request)
+            return JsonResponse({
+                "username": username,
+                "status": True,
+                "message": "Logout berhasil!"
+            }, status=200)
+        except:
+            return JsonResponse({
+            "status": False,
+            "message": "Logout gagal."
+            }, status=401)
+```
+
+- Untuk membuat model kustom di Flutter, saya memanfaatkan data JSON yang dihasilkan oleh Django dengan mengakses endpoint lokalnya. Saya menggunakan situs **Quicktype** untuk mengonversi JSON menjadi model Dart. Hasil kode tersebut saya masukkan ke dalam file **`jersey_entry.dart`** yang saya tempatkan di folder baru bernama **`models`**.
+
+- Untuk mengambil data dari Django, saya menambahkan dependensi **`http`** ke proyek Flutter dengan perintah **`flutter pub add http`**. Selain itu, saya melakukan modifikasi pada file di folder **`android`** agar pengaturan jaringan sesuai dengan tutorial.
+
+- Saya kemudian membuat layar baru bernama **`list_jerseyentry.dart`** untuk menampilkan daftar produk. Halaman ini menyesuaikan antara struktur Flutter dan endpoint Django saya. Selanjutnya, saya menambahkan tautan ke halaman ini di **`LeftDrawer`**, serta memperbarui pengaturan agar layar ini dapat diakses dari menu utama.
+
+- Pada halaman **`list_jerseyentry.dart`**, saya hanya menampilkan atribut dasar seperti nama produk, harga, dan deskripsi untuk menjaga antarmuka tetap sederhana dan informatif.
+
+- Setelah itu, saya membuat halaman detail untuk setiap item di daftar produk dengan membuat layar baru bernama **`detail_page.dart`**. Layar ini digunakan untuk menampilkan detail atribut tambahan dari produk, seperti ukuran dan warna, serta menyediakan tombol untuk kembali ke halaman daftar produk.
+```dart
+    //detail_page.dart
+    import 'package:flutter/material.dart';
+    import 'package:jerseyvault/models/jersey_entry.dart';
+
+    class DetailPage extends StatelessWidget {
+    final Product product;
+
+    const DetailPage({super.key, required this.product});
+
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(
+        appBar: AppBar(
+            title: const Text("Jersey Details"),
+        ),
+        body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                Text(
+                product.fields.jerseyName,
+                style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                "Description: ${product.fields.description}",
+                style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                "Quantity: ${product.fields.quantity}",
+                style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                "Price: ${product.fields.price}",
+                style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                "User ID: ${product.fields.user}",
+                style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                "Added on: ${product.fields.time.toLocal()}",
+                style: const TextStyle(fontSize: 16),
+                ),
+            ],
+            ),
+        ),
+        );
+    }
+    }
+
+```
+
+- Saya juga memperbarui **`list_jerseyentry.dart`** agar setiap kotak produk dapat ditekan untuk membuka halaman detail produk tertentu. Untuk mendapatkan data detail, saya membuat fungsi yang mengambil informasi spesifik dari backend menggunakan ID produk.
+
+- Untuk mengintegrasikan form Flutter dengan Django, saya memodifikasi file **`views.py`** pada aplikasi utama Django dengan menambahkan fungsi **`create_product_flutter`**. Fungsi ini dipanggil oleh **`jerseyentry_form.dart`** di Flutter. Saya juga memastikan semua fungsi lain di file tersebut bekerja sesuai kebutuhan.
+
+- Terakhir, saya menambahkan fitur logout. Prosesnya hampir serupa dengan login, di mana Flutter mengirimkan permintaan ke endpoint Django untuk menghapus sesi pengguna, dan setelah itu pengguna diarahkan kembali ke halaman login.
